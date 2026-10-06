@@ -4,6 +4,10 @@ A conversational front-desk agent for Sunrise Clinic (Dehradun), built against a
 fixed tool-layer ground truth, plus a two-screen React UI (Handoff Queue,
 Conversation Detail).
 
+**Live:** frontend at https://swasthiq-assignment-lyart.vercel.app, backend at
+https://clinic-agent-backend.onrender.com (free tier - first request after
+idling can take ~50s to wake up).
+
 ## Run it
 
 **Backend** (Python 3.11+):
