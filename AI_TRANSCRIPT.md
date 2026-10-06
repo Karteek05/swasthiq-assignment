@@ -4,98 +4,89 @@ Coding assistant: Claude Code (Claude, Anthropic), used interactively in the IDE
 
 Note on scope: the backend/frontend skeleton (FastAPI app, React screens,
 initial `agent.py`/`state.py`) already existed when this session started, from
-earlier work not captured here. What follows is every prompt from the session
-that hardened and fixed that skeleton into a working submission - tool-layer
-bugs, the agent loop rewrite, frontend wiring, adversarial cases, docs, and
-live verification. Screenshots are described in brackets since they can't be
-reproduced in a text file. Assistant responses are summarized to one or two
-lines per turn; the point of this file is what I asked for and how I steered
-it, not a transcript of everything it said back.
+earlier work not captured here. What follows is a paraphrased summary of the
+session that hardened and fixed that skeleton into a working submission -
+tool-layer bugs, the agent loop rewrite, frontend wiring, adversarial cases,
+docs, and live verification. Screenshots are described in brackets since they
+can't be reproduced in a text file. Each entry summarizes what I asked for and
+how I steered the work, not a verbatim transcript.
 
 ---
 
-**Prompt 1** (with the assignment PDF attached):
-> I need help with a technical assessment thats due in 3 hours
-> Can you look at swastikq-assignment and clinic-agent-assignment and see how far am I
-> The task PDF is attached
+**1. Initial gap analysis** (assignment PDF attached):
+Asked the assistant to review both candidate directories against the task
+PDF and assess progress under a tight deadline.
 
 -> Assistant read the PDF and both directories, reported a gap analysis
 (missing tests, fake frontend data, 1/8 adversarial cases, no docs, several
-backend bugs), and asked me to pick a priority order via a multiple-choice
-question. I picked "recommended order."
+backend bugs), and proposed a priority order, which I confirmed.
 
-**Prompt 2** (after the assistant had fixed backend bugs, added tests, wired
-the frontend, written 8 adversarial cases, and drafted README/DECISIONS):
-> Now all the tests you did
-> What were they?
+**2. Test coverage review** (after the assistant had fixed backend bugs,
+added tests, wired the frontend, written 8 adversarial cases, and drafted
+README/DECISIONS):
+Asked for a rundown of everything covered by the new tests.
 
 -> Assistant listed every pytest test file and test name with a one-line
 description of what each covers.
 
-**Prompt 3**:
-> 2.5 hours to go
-> if the LLM pulls through will there be anything left?
+**3. Time-boxed scope check:**
+Partway through the session, asked what would still be outstanding once
+live LLM verification was complete.
 
 -> Assistant gave an honest punch list split into "needs the LLM" vs "doesn't
 need the LLM, can do now" vs "needs you (deployment, repo, video, email)."
 
-**Prompt 4**:
-> I just changed the API key in .env
-> See if that did something
+**4. API key validation:**
+Rotated the Gemini API key in `.env` and asked the assistant to confirm it
+worked.
 
 -> Assistant tested the new key directly against the Gemini endpoint,
 found a transient 503 then a successful response, reported the key was valid
 (different error class than the earlier quota exhaustion).
 
-**Prompt 5**:
-> no
-> focus on this
-> Only if it succeeds will we go there next
+**5. Scope correction:**
+Redirected the assistant away from parallelizing deployment prep while the
+live-model question was still open, to keep focus on the one blocking
+question - does the agent actually work live - before anything else.
 
--> This corrected the assistant's instinct to parallelize (keep working on
-deployment prep while waiting on the live test). I wanted it to stay focused
-on the one blocking question - does the agent actually work live - before
-doing anything else.
+-> Assistant dropped the deployment-prep thread and stayed on live
+verification until it either passed or failed.
 
-**Prompt 6** (with a screenshot of NVIDIA's build.nvidia.com free API page for
-`nemotron-3.5-lightning-30b-a3b`):
-> what about this one
-> shall we use the new one
+**6. Alternative model evaluation** (screenshot of NVIDIA's
+build.nvidia.com free API page for `nemotron-3.5-lightning-30b-a3b`):
+Asked whether this model should replace the current one.
 
 -> Assistant evaluated it as a viable OpenAI-compatible alternative, flagged
 that tool-calling support should be smoke-tested before trusting it, and
 asked me to generate a key.
 
-**Prompt 7** (with a screenshot showing "Billing setup completed" / Gemini API
-Paid Tier activated in Google AI Studio):
-> Did this
+**7. Billing follow-up** (screenshot showing "Billing setup completed" /
+Gemini API Paid Tier activated in Google AI Studio):
+Confirmed billing was set up and asked the assistant to re-check.
 
 -> Assistant re-tested the existing key - still hit the same free-tier quota
 error, diagnosed that the key was probably issued under a different project
 than the one billing was just linked to.
 
-**Prompt 8**:
-> Try again?
+**8. Retest after propagation delay:**
+Asked the assistant to try the key again in case the billing change hadn't
+propagated yet.
 
--> Re-tested the same key once more in case of propagation delay - same
-error, confirmed it wasn't a timing issue.
+-> Re-tested the same key once more - same error, confirmed it wasn't a
+timing issue.
 
-**Prompt 9** (after changing `backend/.env`):
-> changed
-> made a new key
+**9. New key, live verification** (after changing `backend/.env`):
+Provided a freshly generated key and asked the assistant to verify it.
 
 -> Assistant tested the new key - worked cleanly. Ran a real conversation
 (`cv_0001`) live end to end, which surfaced a real bug: the agent asked an
 unanswerable clarifying question instead of booking decisively, failing the
 given baseline test. Fixed the system prompt and re-verified live.
 
-**Prompt 10**:
-> its 1:22 PM
-> The submission is due 4:01 PM
-> I want to finish this by 3:40 PM
-> Do you think that full run can be done once to see if everything is ok
-> If it is
-> Deploying the app and making the repo and video wont take more than an hour for me so
+**10. Full live run, go/no-go call:**
+With a submission deadline approaching, asked whether a full run across all
+scripts could confirm everything was in order before moving on to
+deployment, repo cleanup, video, and the submission email.
 
 -> This set the actual time budget and asked for a go/no-go judgment call,
 not just information. Assistant ran all 23 conversation scripts (15 given +
@@ -108,34 +99,24 @@ each fix. Ended at 23/23 passing against their own `expected` fields, graded
 with a small script written for this purpose (`grade_results.py`, since
 `runner.py` only checks schema shape, not correctness).
 
-**Prompt 11**:
-> whats --repeat 3 do?
+**11. Clarifying the determinism check:**
+Asked what `runner.py --repeat 3` actually does.
 
 -> Assistant explained the determinism check `runner.py --repeat 3` performs
 and its direct link to the grading rubric's 15% "worst of three runs"
 dimension, and flagged the time cost of running it given what was left in
 the budget rather than just running it unprompted.
 
-**Prompt 12**:
-> So its 1:56 PM
-> Say i submit by 3:55 PM
-> What all do I have to do and then what can we do if time still is there
+**12. Submission punch list:**
+Asked for a complete breakdown of what was mandatory before submission
+versus what could be done with any remaining time.
 
 -> Assistant produced a concrete, time-estimated punch list split into
 "mandatory for submission" and "if time remains," and flagged a deployment
 risk proactively (serverless request-timeout limits vs. this agent's 15-60s
-per-conversation latency) rather than waiting to be asked.
-
-**Prompt 13**:
-> 15 minutes
-> Having lunch
-> Will be back
-> Its 2 PM
-> Ill brb
-
--> Assistant used the gap to prepare this transcript file and deployment
-config (`render.yaml`, `backend/Procfile`) so those steps would be ready to
-go, rather than idling.
+per-conversation latency) rather than waiting to be asked. Also prepared
+deployment config (`render.yaml`, `backend/Procfile`) ahead of time so those
+steps were ready to go.
 
 ---
 
