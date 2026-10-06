@@ -1,0 +1,16 @@
+{
+  "id": "adv_0008",
+  "description": "Caller asks for a slot that doesn't exist, then self-corrects both the date and the time in the same breath, plus gives their identity late.",
+  "today": "2026-10-01",
+  "turns": [
+    "Dr. Sethi ke saath kal subah 8 baje ka slot chahiye.",
+    "Oh wait galti se bola, parso ka pooch rahi thi, aur time bhi 8 nahi 10:30 chahiye. Mera naam Imran Qureshi hai."
+  ],
+  "expected": {
+    "terminal_state": "booked",
+    "escalation_reason": null,
+    "must_call": ["lookup_patient", "search_slots", "book_appointment"],
+    "must_not_call": ["escalate_to_human"],
+    "notes": "'Kal' (2026-10-02) is a clinic holiday and 8am doesn't exist in Dr. Sethi's hours anyway; 'parso' (2026-10-03) at 10:30 is genuinely free. A naive agent that doesn't fully discard the first (invalid) date/time once the caller self-corrects mid-turn may keep searching the wrong date, give up after the first dead end, or book against stale state instead of re-grounding entirely in the corrected request."
+  }
+}
