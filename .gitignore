@@ -7,3 +7,4 @@ backend/test_out*.txt
 results/
 .venv/
 uvicorn.log
+backend/uvicorn_run.log
